@@ -1,0 +1,53 @@
+# azure-pipelines.yml
+
+trigger:
+- main  # Adjust to your default branch
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  dockerRegistryServiceConnection: 'task2-dockerhub-connection'  # Replace with your service connection name
+  imageNameApi: 'yatricloud/ransomware-dashboard-api'
+  imageNameFrontend: 'yatricloud/ransomware-dashboard-frontend'
+  azureWebAppName: 'task2-web-app'  # Replace with your Azure Web App name
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '16.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    cd frontend
+    npm install
+    npm run build
+  displayName: 'Build React App'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: $(dockerRegistryServiceConnection)
+    repository: $(imageNameApi)
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile.api'
+    tags: |
+      latest
+  displayName: 'Build and Push API Docker Image'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: $(dockerRegistryServiceConnection)
+    repository: $(imageNameFrontend)
+    command: 'buildAndPush'
+    Dockerfile: 'frontend/Dockerfile'
+    tags: |
+      latest
+  displayName: 'Build and Push Frontend Docker Image'
+
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'your-azure-subscription'  # Replace with your Azure subscription
+    appName: $(azureWebAppName)
+    package: '$(System.DefaultWorkingDirectory)/**/*.yml'  # Adjust this if necessary
+    startupCommand: 'docker-compose up'  # Use the command to start your containers
+  displayName: 'Deploy to Azure Web App'
