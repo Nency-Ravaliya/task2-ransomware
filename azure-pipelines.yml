@@ -2,10 +2,7 @@ trigger:
   branches:
     include:
       - main  # Trigger on main branch updates
-  paths:
-    include:
-      - frontend/*
-      - Dockerfile.api
+      
 pool:
   name: 'Default'  # Specify the agent pool name
   demands:
