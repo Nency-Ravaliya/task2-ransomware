@@ -7,7 +7,7 @@ with open('ransomware_overview.json') as file:
 
 # Connect to MongoDB
 # client = MongoClient('mongodb://localhost:27017/')
-client = MongoClient("mongodb+srv://nensi:yatricloud@cluster0.mongodb.net/ransomware_db?retryWrites=true&w=majority")
+client = MongoClient("mongodb+srv://nensi:yatricloud@cluster0.fthx3.mongodb.net/")
 db = client['ransomware_db']
 collection = db['ransomware_data']
 
