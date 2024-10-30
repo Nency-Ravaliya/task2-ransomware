@@ -52,7 +52,7 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard">
-            <h1>Ransomware Overview</h1>
+            <h1>Ransomware Task</h1>
             <button onClick={() => setIsFormVisible(true)} className="open-form-button">
                 Add New Data
             </button>
