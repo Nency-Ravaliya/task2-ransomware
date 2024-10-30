@@ -6,7 +6,7 @@ trigger:
 pool:
   name: 'Default'  # Specify the agent pool name
   demands:
-    - agent.name -equals nensijsk  #
+    - agent.name -equals nensijsk  # Use specific agent "nensijsk"
 
 variables:
   dockerRegistryServiceConnection: 'task2-dockerhub-connection'  # Docker Hub service connection name
@@ -27,17 +27,9 @@ steps:
     npm run build
   displayName: 'Build React App'
 
+# Conditionally build and push the frontend Docker image if changes are detected in the frontend directory
 - task: Docker@2
-  inputs:
-    containerRegistry: $(dockerRegistryServiceConnection)
-    repository: $(imageNameApi)
-    command: 'buildAndPush'
-    Dockerfile: 'Dockerfile.api'  # Adjust to the correct Dockerfile path for API
-    tags: |
-      latest
-  displayName: 'Build and Push API Docker Image'
-
-- task: Docker@2
+  condition: contains(variables['Build.Changes'], 'frontend/')  # Run only if files in frontend/ are modified
   inputs:
     containerRegistry: $(dockerRegistryServiceConnection)
     repository: $(imageNameFrontend)
@@ -47,14 +39,14 @@ steps:
       latest
   displayName: 'Build and Push Frontend Docker Image'
 
-# - task: AzureWebAppContainer@1
-#   inputs:
-#     azureSubscription: 'your-azure-subscription'  # Replace with your Azure subscription name
-#     appName: $(azureWebAppName)
-#     containers: |
-#       $(imageNameApi):latest
-#       $(imageNameFrontend):latest
-#     dockerComposeFile: $(dockerComposeFile)
-#     configuration: '$(System.DefaultWorkingDirectory)/docker-compose.yml'  # Ensures the latest file is used
-#     startupCommand: 'docker-compose up -d'
-#   displayName: 'Deploy to Azure Web App using Docker Compose'
+# Conditionally build and push the API Docker image if changes are detected outside the frontend directory
+- task: Docker@2
+  condition: not(contains(variables['Build.Changes'], 'frontend/'))  # Run only if files outside frontend/ are modified
+  inputs:
+    containerRegistry: $(dockerRegistryServiceConnection)
+    repository: $(imageNameApi)
+    command: 'buildAndPush'
+    Dockerfile: 'Dockerfile.api'  # Adjust to correct Dockerfile path for API
+    tags: |
+      latest
+  displayName: 'Build and Push API Docker Image'
