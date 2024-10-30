@@ -22,11 +22,11 @@ const RansomwareForm = ({ fetchRansomwareData, existingData, setExistingData }) 
         try {
             if (existingData) {
                 // Update existing data
-                await axios.put(`http://localhost:5000/ransomware/${existingData._id}`, newData);
+                await axios.put(`http://reactpython-web-fgg0gjhbbtgydxa0.eastus-01.azurewebsites.net/ransomware/${existingData._id}`, newData);
                 setExistingData(null); // Reset the form
             } else {
                 // Add new data
-                await axios.post('http://localhost:5000/ransomware', newData);
+                await axios.post('http://reactpython-web-fgg0gjhbbtgydxa0.eastus-01.azurewebsites.net/ransomware', newData);
             }
             fetchRansomwareData();  // Refresh the data
             setName('');
