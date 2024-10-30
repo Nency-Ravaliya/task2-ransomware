@@ -1,3 +1,4 @@
+# Dockerfile for React Frontend
 FROM node:16
 
 # Set the working directory

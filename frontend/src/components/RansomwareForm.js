@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import '../styles/RansomwareForm.css'; // Ensure you have a CSS file for styles
+import '../styles/RansomwareForm.css';
 
-const RansomwareForm = ({ fetchRansomwareData, existingData, setExistingData }) => {
-    const [name, setName] = useState(existingData ? existingData.name.join(', ') : '');
-    const [extensions, setExtensions] = useState(existingData ? existingData.extensions : '');
-    const [encryptionAlgorithm, setEncryptionAlgorithm] = useState(existingData ? existingData.encryptionAlgorithm : '');
-    const [ransomNoteFilenames, setRansomNoteFilenames] = useState(existingData ? existingData.ransomNoteFilenames : '');
-    const [resources, setResources] = useState(existingData ? existingData.resources.join(', ') : '');
+const RansomwareForm = ({ existingData, fetchRansomwareData, setExistingData }) => {
+    const [name, setName] = useState(existingData?.name || '');
+    const [extensions, setExtensions] = useState(existingData?.extensions || '');
+    const [encryptionAlgorithm, setEncryptionAlgorithm] = useState(existingData?.encryptionAlgorithm || '');
+    const [ransomNoteFilenames, setRansomNoteFilenames] = useState(existingData?.ransomNoteFilenames || '');
+    const [resources, setResources] = useState(existingData?.resources?.join(', ') || '');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -18,15 +18,15 @@ const RansomwareForm = ({ fetchRansomwareData, existingData, setExistingData }) 
             ransomNoteFilenames,
             resources: resources.split(',').map(link => link.trim()),
         };
-
+    
         try {
             if (existingData) {
                 // Update existing data
-                await axios.put(`http://reactpython-web-fgg0gjhbbtgydxa0.eastus-01.azurewebsites.net/ransomware/${existingData._id}`, newData);
+                await axios.put(`https://task2-web-app-ajeyayfpdqhdh2ec.centralindia-01.azurewebsites.net/ransomware/${existingData._id}`, newData);
                 setExistingData(null); // Reset the form
             } else {
                 // Add new data
-                await axios.post('http://reactpython-web-fgg0gjhbbtgydxa0.eastus-01.azurewebsites.net/ransomware', newData);
+                await axios.post('https://task2-web-app-ajeyayfpdqhdh2ec.centralindia-01.azurewebsites.net/ransomware', newData);
             }
             fetchRansomwareData();  // Refresh the data
             setName('');

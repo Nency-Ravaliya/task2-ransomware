@@ -12,7 +12,8 @@ const Dashboard = () => {
 
     const fetchRansomwareData = async () => {
         try {
-            const result = await axios.get('https://reactpython-web-fgg0gjhbbtgydxa0.eastus-01.azurewebsites.net/ransomware');
+            // Use HTTPS for API calls
+            const result = await axios.get('https://task2-web-app-ajeyayfpdqhdh2ec.centralindia-01.azurewebsites.net/ransomware');
             // Sort data in reverse order
             setData(result.data.reverse());
             setLoading(false);
@@ -34,7 +35,7 @@ const Dashboard = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://reactpython-web-fgg0gjhbbtgydxa0.eastus-01.azurewebsites.net/ransomware/${id}`);
+            await axios.delete(`https://task2-web-app-ajeyayfpdqhdh2ec.centralindia-01.azurewebsites.net/ransomware/${id}`);
             fetchRansomwareData(); // Refresh the data
         } catch (error) {
             console.error("Error deleting data:", error);
