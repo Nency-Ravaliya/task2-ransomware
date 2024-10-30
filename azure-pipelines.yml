@@ -1,16 +1,19 @@
-# azure-pipelines.yml
-
 trigger:
-- main  # Adjust to your default branch
+  branches:
+    include:
+      - main  # Trigger on main branch updates
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'Default'  # Specify the agent pool name
+  demands:
+    - agent.name -equals nensijsk  # Ensure it uses the specified agent
 
 variables:
-  dockerRegistryServiceConnection: 'task2-dockerhub-connection'  # Replace with your Docker service connection name
+  dockerRegistryServiceConnection: 'task2-dockerhub-connection'  # Docker Hub service connection name
   imageNameApi: 'yatricloud/ransomware-dashboard-api'
   imageNameFrontend: 'yatricloud/ransomware-dashboard-frontend'
-  azureWebAppName: 'task2-web-app'  # Replace with your Azure Web App name
+  azureWebAppName: 'task2-web-app'  # Azure Web App name
+  dockerComposeFile: 'docker-compose.yml'
 
 steps:
 - task: NodeTool@0
@@ -29,7 +32,7 @@ steps:
     containerRegistry: $(dockerRegistryServiceConnection)
     repository: $(imageNameApi)
     command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile.api'  # Ensure this points to your API Dockerfile
+    Dockerfile: 'Dockerfile.api'  # Adjust to the correct Dockerfile path for API
     tags: |
       latest
   displayName: 'Build and Push API Docker Image'
@@ -39,15 +42,19 @@ steps:
     containerRegistry: $(dockerRegistryServiceConnection)
     repository: $(imageNameFrontend)
     command: 'buildAndPush'
-    Dockerfile: 'frontend/Dockerfile'  # Ensure this points to your Frontend Dockerfile
+    Dockerfile: 'frontend/Dockerfile'  # Adjust to correct Dockerfile path for frontend
     tags: |
       latest
   displayName: 'Build and Push Frontend Docker Image'
 
-- task: AzureWebApp@1
-  inputs:
-    azureSubscription: 'Visual Studio Enterprise Subscription'  # Replace with your Azure subscription name
-    appName: $(azureWebAppName)
-    package: '$(System.DefaultWorkingDirectory)/**/*.yml'  # Adjust this if necessary
-    startupCommand: 'docker-compose up'  # Use the command to start your containers
-  displayName: 'Deploy to Azure Web App'
+# - task: AzureWebAppContainer@1
+#   inputs:
+#     azureSubscription: 'your-azure-subscription'  # Replace with your Azure subscription name
+#     appName: $(azureWebAppName)
+#     containers: |
+#       $(imageNameApi):latest
+#       $(imageNameFrontend):latest
+#     dockerComposeFile: $(dockerComposeFile)
+#     configuration: '$(System.DefaultWorkingDirectory)/docker-compose.yml'  # Ensures the latest file is used
+#     startupCommand: 'docker-compose up -d'
+#   displayName: 'Deploy to Azure Web App using Docker Compose'
