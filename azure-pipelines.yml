@@ -6,7 +6,7 @@ trigger:
 pool:
   name: 'Default'  # Specify the agent pool name
   demands:
-    - agent.name -equals nensijsk  # Ensure it uses the specified agent
+    - agent.name -equals nensijsk  #
 
 variables:
   dockerRegistryServiceConnection: 'task2-dockerhub-connection'  # Docker Hub service connection name
