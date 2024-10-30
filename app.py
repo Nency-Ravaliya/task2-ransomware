@@ -8,7 +8,7 @@ app = Flask(__name__, static_folder='frontend/build', static_url_path='/')
 CORS(app)
 
 # Connect to MongoDB Atlas
-client = MongoClient("mongodb+srv://nensi:yatricloud@cluster0.fthx3.mongodb.net/ransomware_db?retryWrites=true&w=majority")
+client = MongoClient("mongosh "mongodb+srv://cluster0.fthx3.mongodb.net/" --apiVersion 1 --username nensiransomware_db?retryWrites=true&w=majority")
 db = client['ransomware_db']
 collection = db['ransomware_data']
 
