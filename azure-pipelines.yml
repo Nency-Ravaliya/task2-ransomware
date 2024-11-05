@@ -1,10 +1,10 @@
 trigger:
   branches:
     include:
-      - main  # Trigger on main branch updates
+      - main  # Trigger on updates to the main branch
 
 pool:
-  name: 'Default'  # Specify the agent pool name
+  name: 'Default'  # Specify the agent pool
   demands:
     - agent.name -equals nensijsk  # Target the specific agent "nensijsk"
 
@@ -15,34 +15,61 @@ variables:
   azureWebAppName: 'task2-web-app'  # Azure Web App name
   dockerComposeFile: 'docker-compose.yml'
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '16.x'
-  displayName: 'Install Node.js'
+stages:
 
-- script: |
-    cd frontend
-    npm install
-    npm run build
-  displayName: 'Build React App'
+# Stage 1: Setup Node.js
+- stage: Setup
+  displayName: 'Setup Environment'
+  jobs:
+  - job: SetupNode
+    displayName: 'Install Node.js'
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '16.x'
+        displayName: 'Install Node.js Version 16.x'
 
-- task: Docker@2
-  inputs:
-    containerRegistry: $(dockerRegistryServiceConnection)
-    repository: $(imageNameFrontend)
-    command: 'buildAndPush'
-    Dockerfile: 'frontend/Dockerfile'  # Adjust to correct Dockerfile path for frontend
-    tags: |
-      latest
-  displayName: 'Build and Push Frontend Docker Image'
+# Stage 2: Build Frontend
+- stage: BuildFrontend
+  displayName: 'Build Frontend'
+  dependsOn: Setup
+  jobs:
+  - job: BuildReactApp
+    displayName: 'Build React Application'
+    steps:
+      - script: |
+          cd frontend
+          npm install
+          npm run build
+        displayName: 'Install and Build React App'
 
-- task: Docker@2
-  inputs:
-    containerRegistry: $(dockerRegistryServiceConnection)
-    repository: $(imageNameApi)
-    command: 'buildAndPush'
-    Dockerfile: 'Dockerfile.api'  # Adjust to correct Dockerfile path for API
-    tags: |
-      latest
-  displayName: 'Build and Push API Docker Image'
+# Stage 3: Build and Push Docker Images
+- stage: DockerBuildAndPush
+  displayName: 'Build and Push Docker Images'
+  dependsOn: BuildFrontend
+  jobs:
+  - job: BuildAndPushFrontendImage
+    displayName: 'Build and Push Frontend Docker Image'
+    steps:
+      - task: Docker@2
+        inputs:
+          containerRegistry: $(dockerRegistryServiceConnection)
+          repository: $(imageNameFrontend)
+          command: 'buildAndPush'
+          Dockerfile: 'frontend/Dockerfile'  # Path to frontend Dockerfile
+          tags: |
+            latest
+        displayName: 'Build and Push Frontend Docker Image to Docker Hub'
+
+  - job: BuildAndPushApiImage
+    displayName: 'Build and Push API Docker Image'
+    steps:
+      - task: Docker@2
+        inputs:
+          containerRegistry: $(dockerRegistryServiceConnection)
+          repository: $(imageNameApi)
+          command: 'buildAndPush'
+          Dockerfile: 'Dockerfile.api'  # Path to API Dockerfile
+          tags: |
+            latest
+        displayName: 'Build and Push API Docker Image to Docker Hub'
