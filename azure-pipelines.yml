@@ -10,8 +10,8 @@ pool:
 
 variables:
   dockerRegistryServiceConnection: 'task2-dockerhub-connection'  # Docker Hub service connection name
-  imageNameApi: 'yatricloud/ransomware-dashboard-api'
-  imageNameFrontend: 'yatricloud/ransomware-dashboard-frontend'
+  imageNameApi: 'nensiravaliya28/ransomware-dashboard-api'
+  imageNameFrontend: 'nensiravaliya28/ransomware-dashboard-frontend'
   azureWebAppName: 'task2-web-app'  # Azure Web App name
   dockerComposeFile: 'docker-compose.yml'
 
