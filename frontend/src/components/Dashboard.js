@@ -13,7 +13,7 @@ const Dashboard = () => {
     const fetchRansomwareData = async () => {
         try {
             // Use HTTPS for API calls
-            const result = await axios.get('https://task2-web-app-ajeyayfpdqhdh2ec.centralindia-01.azurewebsites.net/ransomware');
+            const result = await axios.get(`https://task2-web-app-ajeyayfpdqhdh2ec.centralindia-01.azurewebsites.net/ransomware`);
             // Sort data in reverse order
             setData(result.data.reverse());
             setLoading(false);
