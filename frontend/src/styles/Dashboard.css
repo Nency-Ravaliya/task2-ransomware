@@ -49,12 +49,16 @@
 .data-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: auto; /* Allow automatic column width based on content */
 }
 
 .data-table th, .data-table td {
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+    overflow-wrap: break-word; /* Allow text to wrap */
+    word-wrap: break-word; /* For older browsers */
+    word-break: break-word; /* Break long words if needed */
 }
 
 .json-data-container {
@@ -63,6 +67,15 @@
 
 .json-data-container h2 {
     margin-bottom: 10px;
+}
+
+.data-table th {
+    max-width: 150px; /* Set max width for header cells */
+}
+
+.data-table td {
+    max-width: 150px; /* Set max width for data cells */
+    height: auto; /* Al Prevent text wrapping */
 }
 
 .json-data-container pre {
