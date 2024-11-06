@@ -17,6 +17,7 @@ const RansomwareForm = ({ existingData, setExistingData, onAddOrUpdateData }) =>
     const [resources, setResources] = useState(existingData?.resources?.join(', ') || '');
     const [screenshots, setScreenshots] = useState(existingData?.screenshots || '');
     const [snort, setSnort] = useState(existingData?.snort || '');
+    const [duplicateError, setDuplicateError] = useState(''); // State for duplicate error message
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -38,6 +39,18 @@ const RansomwareForm = ({ existingData, setExistingData, onAddOrUpdateData }) =>
         };
 
         try {
+            // Check for duplicates before sending data
+            const response = await axios.get('https://task2-web-app-ajeyayfpdqhdh2ec.centralindia-01.azurewebsites.net/ransomware');
+            const existingRecords = response.data;
+
+            const isDuplicate = existingRecords.some(item => item.name[0] === name);
+            if (isDuplicate) {
+                setDuplicateError('Duplicate entry not allowed.'); // Set the duplicate error message
+                return; // Exit the function if duplicate found
+            } else {
+                setDuplicateError(''); // Clear the error message
+            }
+
             if (existingData) {
                 // Update existing data
                 await axios.put(`https://task2-web-app-ajeyayfpdqhdh2ec.centralindia-01.azurewebsites.net/ransomware/${existingData._id}`, newData);
@@ -46,6 +59,7 @@ const RansomwareForm = ({ existingData, setExistingData, onAddOrUpdateData }) =>
                 // Add new data
                 await axios.post('https://task2-web-app-ajeyayfpdqhdh2ec.centralindia-01.azurewebsites.net/ransomware', newData);
             }
+
             // Reset form fields
             setName('');
             setExtensions('');
@@ -62,6 +76,7 @@ const RansomwareForm = ({ existingData, setExistingData, onAddOrUpdateData }) =>
             setScreenshots('');
             setSnort('');
             setExistingData(null); // Reset existing data after submission
+
         } catch (error) {
             console.error("Error adding/updating data:", error);
         }
@@ -70,6 +85,7 @@ const RansomwareForm = ({ existingData, setExistingData, onAddOrUpdateData }) =>
     return (
         <form onSubmit={handleSubmit} className="ransomware-form">
             <h2>{existingData ? 'Update' : 'Add'} Ransomware Data</h2>
+            {duplicateError && <div className="error-message">{duplicateError}</div>} {/* Display error message */}
             <input
                 type="text"
                 placeholder="Name"
