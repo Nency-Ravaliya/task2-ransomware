@@ -153,3 +153,6 @@ To interact directly with the MongoDB Atlas database:
 - **Dashboard.js**: Main interface displaying ransomware data.
 - **RansomwareForm.js**: Form component for adding and updating records.
 ```
+
+### Data insertion into the database
+![image](https://github.com/user-attachments/assets/e231601b-3eaf-4db1-81de-80613afcc178)
