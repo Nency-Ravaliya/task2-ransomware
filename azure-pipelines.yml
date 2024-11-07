@@ -10,66 +10,99 @@ pool:
 
 variables:
   dockerRegistryServiceConnection: 'task2-dockerhub-connection'  # Docker Hub service connection name
-  imageNameApi: 'nensiravaliya28/ransomware-dashboard-api'
-  imageNameFrontend: 'nensiravaliya28/ransomware-dashboard-frontend'
-  azureWebAppName: 'task2-web-app'  # Azure Web App name
-  dockerComposeFile: 'docker-compose.yml'
+  imageNameApi: 'nensiravaliya28/ransomware-dashboard-api'  # Docker Hub image name for API
+  imageNameFrontend: 'nensiravaliya28/ransomware-dashboard-frontend'  # Docker Hub image name for Frontend
+  kubernetesNamespace: 'default'  # Change if you are using a different namespace
+  kubernetesCluster: 'your-aks-cluster-name'  # Your AKS cluster name
+  azureSubscription: 'your-azure-subscription'  # Azure subscription name
 
-stages:
+steps:
+- task: Docker@2
+  displayName: 'Build and push backend image'
+  inputs:
+    command: 'buildAndPush'
+    repository: '$(imageNameApi)'
+    dockerfile: '**/Dockerfile.api'
+    tags: |
+      $(Build.BuildId)
+    containerRegistry: '$(dockerRegistryServiceConnection)'  # Docker Hub service connection
 
-# Stage 1: Setup Node.js
-- stage: Setup
-  displayName: 'Setup Environment'
-  jobs:
-  - job: SetupNode
-    displayName: 'Install Node.js'
-    steps:
-      - task: NodeTool@0
-        inputs:
-          versionSpec: '18.x'
-        displayName: 'Install Node.js Version 16.x'
+- task: Docker@2
+  displayName: 'Build and push frontend image'
+  inputs:
+    command: 'buildAndPush'
+    repository: '$(imageNameFrontend)'
+    dockerfile: '**/Dockerfile'
+    tags: |
+      $(Build.BuildId)
+    containerRegistry: '$(dockerRegistryServiceConnection)'  # Docker Hub service connection
 
-# Stage 2: Build Frontend
-- stage: BuildFrontend
-  displayName: 'Build Frontend'
-  dependsOn: Setup
-  jobs:
-  - job: BuildReactApp
-    displayName: 'Build React Application'
-    steps:
-      - script: |
-          cd frontend
-          npm install
-          npm run build
-        displayName: 'Install and Build React App'
+- task: AzureCLI@2
+  displayName: 'Deploy to AKS'
+  inputs:
+    azureSubscription: '$(azureSubscription)'  # Azure subscription for AKS
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az aks get-credentials --resource-group your-resource-group --name $(kubernetesCluster)  # Get AKS credentials
+      kubectl set image deployment/backend backend=$(imageNameApi):$(Build.BuildId) --namespace $(kubernetesNamespace)  # Update backend deployment
+      kubectl set image deployment/frontend frontend=$(imageNameFrontend):$(Build.BuildId) --namespace $(kubernetesNamespace)  # Update frontend deployment
 
-# Stage 3: Build and Push Docker Images
-- stage: DockerBuildAndPush
-  displayName: 'Build and Push Docker Images'
-  dependsOn: BuildFrontend
-  jobs:
-  - job: BuildAndPushFrontendImage
-    displayName: 'Build and Push Frontend Docker Image'
-    steps:
-      - task: Docker@2
-        inputs:
-          containerRegistry: $(dockerRegistryServiceConnection)
-          repository: $(imageNameFrontend)
-          command: 'buildAndPush'
-          Dockerfile: 'frontend/Dockerfile'  # Path to frontend Dockerfile
-          tags: |
-            latest
-        displayName: 'Build and Push Frontend Docker Image to Docker Hub'
+# stages:
 
-  - job: BuildAndPushApiImage
-    displayName: 'Build and Push API Docker Image'
-    steps:
-      - task: Docker@2
-        inputs:
-          containerRegistry: $(dockerRegistryServiceConnection)
-          repository: $(imageNameApi)
-          command: 'buildAndPush'
-          Dockerfile: 'Dockerfile.api'  # Path to API Dockerfile
-          tags: |
-            latest
-        displayName: 'Build and Push API Docker Image to Docker Hub'
+# # Stage 1: Setup Node.js
+# - stage: Setup
+#   displayName: 'Setup Environment'
+#   jobs:
+#   - job: SetupNode
+#     displayName: 'Install Node.js'
+#     steps:
+#       - task: NodeTool@0
+#         inputs:
+#           versionSpec: '18.x'
+#         displayName: 'Install Node.js Version 16.x'
+
+# # Stage 2: Build Frontend
+# - stage: BuildFrontend
+#   displayName: 'Build Frontend'
+#   dependsOn: Setup
+#   jobs:
+#   - job: BuildReactApp
+#     displayName: 'Build React Application'
+#     steps:
+#       - script: |
+#           cd frontend
+#           npm install
+#           npm run build
+#         displayName: 'Install and Build React App'
+
+# # Stage 3: Build and Push Docker Images
+# - stage: DockerBuildAndPush
+#   displayName: 'Build and Push Docker Images'
+#   dependsOn: BuildFrontend
+#   jobs:
+#   - job: BuildAndPushFrontendImage
+#     displayName: 'Build and Push Frontend Docker Image'
+#     steps:
+#       - task: Docker@2
+#         inputs:
+#           containerRegistry: $(dockerRegistryServiceConnection)
+#           repository: $(imageNameFrontend)
+#           command: 'buildAndPush'
+#           Dockerfile: 'frontend/Dockerfile'  # Path to frontend Dockerfile
+#           tags: |
+#             latest
+#         displayName: 'Build and Push Frontend Docker Image to Docker Hub'
+
+#   - job: BuildAndPushApiImage
+#     displayName: 'Build and Push API Docker Image'
+#     steps:
+#       - task: Docker@2
+#         inputs:
+#           containerRegistry: $(dockerRegistryServiceConnection)
+#           repository: $(imageNameApi)
+#           command: 'buildAndPush'
+#           Dockerfile: 'Dockerfile.api'  # Path to API Dockerfile
+#           tags: |
+#             latest
+#         displayName: 'Build and Push API Docker Image to Docker Hub'
